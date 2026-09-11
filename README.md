@@ -2,33 +2,32 @@
 
 
 
-# [Memeify?] 🎯
+# [Meowmer?] 🎯
 
 
 ## Basic Details
 ### Team Name: [Parzival]
 
 
-### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
+### Team Members(Solo)
+-Kevin Joy
 
 ### Project Description
-[2-3 lines about what your project does]
+[A cat meme bombing program. A random cat meme appears each time you click using your cursor]
 
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
+[People dont get enough dopamine in a day]
 
 ### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
+[This program solves it by giving an instant serotonin boost]
 
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- [Languages used]
-- [Frameworks used]
-- [Libraries used]
-- [Tools used]
+- [Python]
+- [Tkinter, Python Frameworks library]
+- [Pillow, Pygame, pynput]
+- [Python, Visual Studio Code, Powershell,   GitHub,ChatGPT]
 
 For Hardware:
 - [List main components]
@@ -47,18 +46,17 @@ For Software:
 For Software:
 
 # Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
+![Scree![Application in use](<Screenshot (24).png>)nshot1](Add screenshot 1 here with proper name)
 *Add caption explaining what this shows*
 
-![Screenshot2](Add screenshot 2 here with proper name)
+![![Another addition of the application](<Screenshot (31).png>)](Add screenshot 2 here with proper name)
 *Add caption explaining what this shows*
 
-![Screenshot3](Add screenshot 3 here with proper name)
+![Screens![Easter egg. Use the program to find out :)](<Screenshot (29).png>)hot3](Add screenshot 3 here with proper name)
 *Add caption explaining what this shows*
 
 # Diagrams
-![Workflow](Add your workflow/architecture diagram here)
-*Add caption explaining your workflow*
+![Workf![Workflow Diagram and System Architecture](image.png)low]
 
 For Hardware:
 
