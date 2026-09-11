@@ -11,12 +11,9 @@ from pathlib import Path
 # SETTINGS
 # -----------------------------
 
-GIF_FILES = [
-    Path(__file__).parent / "bop_cat.gif",
-    Path(__file__).parent / "scuba_cat.gif",
-]
+GIF_FILE = Path(__file__).parent / "bop_cat.gif"
 
-STICKER_SIZE = 120
+STICKER_SIZE = 180
 STICKER_LIFETIME = 5000  # milliseconds
 
 # All clicks will be sent here
@@ -27,21 +24,22 @@ click_queue = queue.Queue()
 # LOAD GIF
 # -----------------------------
 
-def load_gif(gif_path):
-    gif = Image.open(gif_path)
-    frames = []
-    durations = []
+gif = Image.open(GIF_FILE)
 
-    for frame in ImageSequence.Iterator(gif):
-        duration = frame.info.get("duration", 100)
+frames = []
+durations = []
 
-        frame = frame.convert("RGBA")
-        frame.thumbnail((STICKER_SIZE, STICKER_SIZE))
+for frame in ImageSequence.Iterator(gif):
 
-        frames.append(frame.copy())
-        durations.append(duration)
+    frame = frame.convert("RGBA")
 
-    return frames, durations
+    # Resize sticker
+    frame.thumbnail((STICKER_SIZE, STICKER_SIZE))
+
+    frames.append(frame.copy())
+
+    # Use original GIF timing
+    durations.append(frame.info.get("duration", 100))
 
 
 # -----------------------------
@@ -60,12 +58,6 @@ root.attributes("-topmost", True)
 # -----------------------------
 
 def spawn_sticker(x, y):
-
-    frames, durations = load_gif(random.choice(GIF_FILES))
-
-# Limit the GIF to its first 30 frames
-    frames = frames[:30]
-    durations = durations[:30]
 
     sticker = tk.Toplevel(root)
 
