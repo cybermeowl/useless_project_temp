@@ -13,7 +13,7 @@ from pathlib import Path
 
 GIF_FILES = [
     Path(__file__).parent / "bop_cat.gif",
-    Path(__file__).parent / "scuba1.gif",
+    Path(__file__).parent / "scuba_cat.gif",
 ]
 
 STICKER_SIZE = 120
