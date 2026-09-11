@@ -9,8 +9,8 @@
 ### Team Name: [Parzival]
 
 
-### Team Members(Solo)
--Kevin Joy
+### Team Member(Solo)
+-Kevin Joy Puliyani
 
 ### Project Description
 [A cat meme bombing program. A random cat meme appears each time you click using your cursor]
