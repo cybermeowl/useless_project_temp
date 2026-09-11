@@ -1,5 +1,5 @@
 import tkinter as tk
-from PIL import Image, ImageTk, ImageSequence
+from PIL import Image, ImageTk
 from pynput import mouse
 
 import threading
@@ -17,31 +17,21 @@ import pygame
 BASE_FOLDER = Path(__file__).resolve().parent
 AUDIO_FOLDER = BASE_FOLDER / "cat_audio"
 
+PET_FOLDER = BASE_FOLDER / "pet_the_car"
+
 STICKER_GIFS = [
     BASE_FOLDER / "bop_cat.gif",
     BASE_FOLDER / "scuba_cat.gif",
 ]
 
+NYAN_GIF = BASE_FOLDER / "nyan_cat.gif"
+
+NYAN_AUDIO = AUDIO_FOLDER / "nyan_audio.mp3"
+
 STICKER_AUDIO = {
     "bop_cat.gif": AUDIO_FOLDER / "bop_cat_audio.mp3",
     "scuba_cat.gif": AUDIO_FOLDER / "scuba_cat_audio.mp3",
 }
-
-NYAN_GIF = BASE_FOLDER / "nyan_cat.gif"
-
-PET_CATS = {
-    "bop": {
-        "gif": BASE_FOLDER / "bop_cat.gif",
-        "audio": AUDIO_FOLDER / "bop_cat_audio.mp3",
-    },
-
-    "scuba": {
-        "gif": BASE_FOLDER / "scuba_cat.gif",
-        "audio": AUDIO_FOLDER / "scuba_cat_audio.mp3",
-    },
-}
-
-NYAN_AUDIO = AUDIO_FOLDER / "nyan_audio.mp3"
 
 
 # ==================================================
@@ -53,8 +43,8 @@ STICKER_LIFETIME = 5000
 MAX_STICKER_FRAMES = 30
 
 CLICK_LIMIT = 30
-
 PETS_REQUIRED = 7
+
 PET_CAT_SIZE = 260
 
 NYAN_SIZE = 180
@@ -76,25 +66,49 @@ click_count = 0
 nyan_running = False
 pet_running = False
 
-loaded_sticker_gifs = []
-loaded_pet_cats = {}
-
 pet_window = None
 pet_label = None
 pet_counter_label = None
 
-pet_current_cat = None
 pet_count = 0
+pet_current_cat = None
+
+# This number cancels old pet animations.
+pet_animation_id = 0
 
 nyan_audio_loaded = False
+
+loaded_sticker_gifs = []
+loaded_pet_cats = {}
+
+sticker_audio_loaded = {}
 pet_audio_loaded = {}
 
 
 # ==================================================
-# FIND AUDIO FILE
+# AUDIO HELPERS
 # ==================================================
 
+def stop_all_audio():
+    """
+    Stop every sound and music channel.
+    This prevents audio from clashing with Nyan Cat.
+    """
+
+    try:
+        pygame.mixer.stop()
+    except Exception:
+        pass
+
+    try:
+        pygame.mixer.music.stop()
+    except Exception:
+        pass
+
+
 def find_audio_file(path):
+    if path is None:
+        return None
 
     possible_files = [
         path,
@@ -103,66 +117,113 @@ def find_audio_file(path):
         path.with_suffix(".ogg"),
     ]
 
-    for possible_file in possible_files:
-
-        if possible_file.exists():
-            return possible_file
+    for file_path in possible_files:
+        if file_path.exists():
+            return file_path
 
     return None
 
 
 # ==================================================
-# INITIALIZE AUDIO
+# PET FILE DISCOVERY
+# ==================================================
+
+def discover_pet_cats():
+    pet_cats = {}
+
+    supported_extensions = {
+        ".gif",
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".webp",
+    }
+
+    if not PET_FOLDER.exists():
+        print("Pet-the-car folder was not found:")
+        print(PET_FOLDER)
+        return pet_cats
+
+    for pet_file in sorted(PET_FOLDER.iterdir()):
+        if (
+            pet_file.is_file()
+            and pet_file.suffix.lower()
+            in supported_extensions
+        ):
+            pet_cats[pet_file.stem] = {
+                "gif": pet_file,
+                "audio": None,
+            }
+
+    return pet_cats
+
+
+PET_CATS = discover_pet_cats()
+
+
+# ==================================================
+# AUDIO INITIALIZATION
 # ==================================================
 
 def initialize_audio():
-
     global nyan_audio_loaded
 
-    print()
-    print("========== AUDIO DEBUG ==========")
-    print(f"Project folder: {BASE_FOLDER}")
-    print(f"Audio folder: {AUDIO_FOLDER}")
-
-    if AUDIO_FOLDER.exists():
-
-        print("Files inside cat_audio:")
-
-        for file in AUDIO_FOLDER.iterdir():
-            print(f"  {file.name}")
-
-    else:
-
-        print("ERROR: cat_audio folder does not exist.")
-
-    print("=================================")
-    print()
-
     try:
-
         pygame.mixer.init()
+        pygame.mixer.set_num_channels(32)
 
         print("Pygame audio initialized.")
 
     except Exception as error:
-
-        print("ERROR: Could not initialize pygame audio.")
+        print("Could not initialize pygame audio:")
         print(error)
-
         return
 
-    # ----------------------------------------------
-    # NYAN CAT AUDIO
-    # ----------------------------------------------
+    # Normal sticker sounds
+    for gif_path in STICKER_GIFS:
+        audio_path = STICKER_AUDIO.get(
+            gif_path.name
+        )
 
+        audio_file = find_audio_file(
+            audio_path
+        )
+
+        if audio_file is None:
+            print(
+                f"No audio found for {gif_path.name}"
+            )
+            continue
+
+        try:
+            sound = pygame.mixer.Sound(
+                str(audio_file)
+            )
+
+            sound.set_volume(1.0)
+
+            sticker_audio_loaded[
+                gif_path.name
+            ] = sound
+
+            print(
+                f"Loaded sticker audio: "
+                f"{audio_file.name}"
+            )
+
+        except Exception as error:
+            print(
+                f"Could not load sticker audio "
+                f"for {gif_path.name}: {error}"
+            )
+
+    # Nyan Cat music
     nyan_audio_file = find_audio_file(
         NYAN_AUDIO
     )
 
     if nyan_audio_file is not None:
-
         try:
-
             pygame.mixer.music.load(
                 str(nyan_audio_file)
             )
@@ -170,91 +231,50 @@ def initialize_audio():
             nyan_audio_loaded = True
 
             print(
-                f"Nyan Cat audio loaded: "
-                f"{nyan_audio_file}"
+                f"Loaded Nyan audio: "
+                f"{nyan_audio_file.name}"
             )
 
         except Exception as error:
-
-            print("ERROR loading Nyan Cat audio:")
-            print(error)
-
-    else:
-
-        print(
-            "ERROR: Nyan Cat audio not found."
-        )
-
-        print(
-            f"Expected location: {NYAN_AUDIO}"
-        )
-
-    # ----------------------------------------------
-    # PET CAT AUDIO
-    # ----------------------------------------------
-
-    for cat_name, cat_data in PET_CATS.items():
-
-        audio_file = find_audio_file(
-            cat_data["audio"]
-        )
-
-        if audio_file is None:
-
             print(
-                f"ERROR: {cat_name} audio not found."
+                f"Could not load Nyan audio: {error}"
             )
 
-            print(
-                f"Expected location: "
-                f"{cat_data['audio']}"
-            )
-
-            continue
-
-        try:
-
-            sound = pygame.mixer.Sound(
-                str(audio_file)
-            )
-
-            pet_audio_loaded[cat_name] = sound
-
-            print(
-                f"{cat_name} cat audio loaded: "
-                f"{audio_file}"
-            )
-
-        except Exception as error:
-
-            print(
-                f"ERROR loading {cat_name} audio:"
-            )
-
-            print(error)
+    # Pet audio is optional for now.
+    for pet_name in PET_CATS:
+        pet_audio_loaded[pet_name] = None
 
 
 initialize_audio()
 
 
 # ==================================================
-# LOAD GIF
+# IMAGE/GIF LOADING
 # ==================================================
 
 def load_gif(
-    gif_path,
+    file_path,
     max_size,
     max_frames=None
 ):
-
-    gif = Image.open(gif_path)
+    image = Image.open(file_path)
 
     frames = []
     durations = []
 
-    for frame in ImageSequence.Iterator(gif):
+    frame_count = getattr(
+        image,
+        "n_frames",
+        1
+    )
 
-        frame = frame.convert("RGBA")
+    for frame_index in range(frame_count):
+        try:
+            image.seek(frame_index)
+        except EOFError:
+            break
+
+        frame = image.convert("RGBA")
 
         frame.thumbnail(
             (
@@ -267,7 +287,7 @@ def load_gif(
             frame.copy()
         )
 
-        duration = frame.info.get(
+        duration = image.info.get(
             "duration",
             100
         )
@@ -283,10 +303,9 @@ def load_gif(
             max_frames is not None
             and len(frames) >= max_frames
         ):
-
             break
 
-    gif.close()
+    image.close()
 
     return frames, durations
 
@@ -296,17 +315,13 @@ def load_gif(
 # ==================================================
 
 for gif_path in STICKER_GIFS:
-
     if not gif_path.exists():
-
         print(
-            f"Sticker GIF missing: {gif_path}"
+            f"Sticker file missing: {gif_path}"
         )
-
         continue
 
     try:
-
         frames, durations = load_gif(
             gif_path,
             STICKER_SIZE,
@@ -318,22 +333,15 @@ for gif_path in STICKER_GIFS:
             for frame in frames
         ]
 
-        sound = None
-        audio_file = find_audio_file(STICKER_AUDIO.get(gif_path.name, gif_path))
-        if audio_file is not None:
-            try:
-                sound = pygame.mixer.Sound(str(audio_file))
-                sound.set_volume(1.0)
-                print(f"Sticker audio loaded: {audio_file.name}")
-            except Exception as error:
-                print(f"Could not load sticker audio: {error}")
-
         loaded_sticker_gifs.append(
-            (
-                photos,
-                durations,
-                sound
-            )
+            {
+                "photos": photos,
+                "durations": durations,
+                "sound": sticker_audio_loaded.get(
+                    gif_path.name
+                ),
+                "name": gif_path.name,
+            }
         )
 
         print(
@@ -341,7 +349,6 @@ for gif_path in STICKER_GIFS:
         )
 
     except Exception as error:
-
         print(
             f"Could not load sticker "
             f"{gif_path.name}: {error}"
@@ -349,25 +356,15 @@ for gif_path in STICKER_GIFS:
 
 
 # ==================================================
-# LOAD PET CATS
+# LOAD PET-THE-CAR IMAGES
 # ==================================================
 
-for cat_name, cat_data in PET_CATS.items():
-
-    gif_path = cat_data["gif"]
-
-    if not gif_path.exists():
-
-        print(
-            f"Pet GIF missing: {gif_path}"
-        )
-
-        continue
+for pet_name, pet_data in PET_CATS.items():
+    file_path = pet_data["gif"]
 
     try:
-
         frames, durations = load_gif(
-            gif_path,
+            file_path,
             PET_CAT_SIZE
         )
 
@@ -376,64 +373,65 @@ for cat_name, cat_data in PET_CATS.items():
             for frame in frames
         ]
 
-        loaded_pet_cats[cat_name] = {
+        loaded_pet_cats[pet_name] = {
             "photos": photos,
             "durations": durations,
         }
 
         print(
-            f"Loaded pet cat: {cat_name}"
+            f"Loaded pet image: {file_path.name}"
         )
 
     except Exception as error:
-
         print(
-            f"Could not load pet cat "
-            f"{cat_name}: {error}"
+            f"Could not load pet image "
+            f"{file_path.name}: {error}"
         )
 
 
+print(
+    f"Loaded {len(loaded_pet_cats)} "
+    f"pet images."
+)
+
+
 # ==================================================
-# SPAWN NORMAL STICKER
+# NORMAL STICKER SPAWNING
 # ==================================================
 
 def spawn_sticker(x, y):
-
     if not loaded_sticker_gifs:
         return
 
-    photos, durations, sound = random.choice(
+    sticker_data = random.choice(
         loaded_sticker_gifs
     )
+
+    photos = sticker_data["photos"]
+    durations = sticker_data["durations"]
+    sound = sticker_data["sound"]
 
     if sound is not None:
         try:
             sound.play()
         except Exception as error:
-            print(f"Could not play sticker audio: {error}")
+            print(
+                f"Could not play sticker sound: "
+                f"{error}"
+            )
 
     sticker = tk.Toplevel(root)
 
     sticker.overrideredirect(True)
-
-    sticker.attributes(
-        "-topmost",
-        True
-    )
-
-    sticker.configure(
-        bg="black"
-    )
+    sticker.attributes("-topmost", True)
+    sticker.configure(bg="black")
 
     try:
-
         sticker.attributes(
             "-transparentcolor",
             "black"
         )
-
     except tk.TclError:
-
         pass
 
     label = tk.Label(
@@ -445,17 +443,19 @@ def spawn_sticker(x, y):
     label.pack()
 
     sticker.geometry(
-        f"{STICKER_SIZE}x{STICKER_SIZE}+{x}+{y}"
+        f"{STICKER_SIZE}x{STICKER_SIZE}"
+        f"+{x}+{y}"
     )
 
     def animate(frame_number=0):
-
         if not sticker.winfo_exists():
             return
 
         label.configure(
             image=photos[frame_number]
         )
+
+        label.image = photos[frame_number]
 
         next_frame = (
             frame_number + 1
@@ -476,32 +476,33 @@ def spawn_sticker(x, y):
 
 
 # ==================================================
-# START PET CHALLENGE
+# PET CHALLENGE
 # ==================================================
 
 def start_pet_challenge():
-
     global pet_running
     global pet_window
     global pet_label
     global pet_counter_label
     global pet_count
     global pet_current_cat
+    global pet_animation_id
 
     if pet_running:
         return
 
     if not loaded_pet_cats:
-
-        print("No pet cats were loaded.")
-
-        start_nyan_cat()
-
+        print(
+            "No images found in pet_the_car."
+        )
         return
 
     pet_running = True
     pet_count = 0
     pet_current_cat = None
+
+    # Stop any normal sticker sounds.
+    stop_all_audio()
 
     pet_window = tk.Toplevel(root)
 
@@ -568,7 +569,7 @@ def start_pet_challenge():
 
     pet_counter_label = tk.Label(
         pet_window,
-        text=f"Pets: 0/{PETS_REQUIRED}",
+        text="Pets: 0/7",
         font=(
             "Arial",
             15
@@ -603,11 +604,6 @@ def start_pet_challenge():
         pet_cat
     )
 
-    title_label.bind(
-        "<Button-1>",
-        pet_cat
-    )
-
     pet_window.protocol(
         "WM_DELETE_WINDOW",
         close_pet_window
@@ -621,44 +617,52 @@ def start_pet_challenge():
 # ==================================================
 
 def close_pet_window():
-
     global pet_running
     global pet_window
+    global pet_animation_id
 
     pet_running = False
 
-    if pet_window is not None:
+    # Invalidate the old animation.
+    pet_animation_id += 1
 
-        pet_window.destroy()
+    if pet_window is not None:
+        try:
+            pet_window.destroy()
+        except tk.TclError:
+            pass
 
     pet_window = None
 
 
 # ==================================================
-# SHOW PET CAT
+# SHOW ONE PET IMAGE
 # ==================================================
 
 def show_pet_cat():
-
     global pet_current_cat
+    global pet_animation_id
 
     if not pet_running:
+        return
+
+    if pet_window is None:
         return
 
     available_cats = list(
         loaded_pet_cats.keys()
     )
 
-    if len(available_cats) > 1:
+    if not available_cats:
+        return
 
+    if len(available_cats) > 1:
         choices = [
             cat
             for cat in available_cats
             if cat != pet_current_cat
         ]
-
     else:
-
         choices = available_cats
 
     pet_current_cat = random.choice(
@@ -672,26 +676,14 @@ def show_pet_cat():
     photos = cat_data["photos"]
     durations = cat_data["durations"]
 
-    sound = pet_audio_loaded.get(
-        pet_current_cat
+    # Cancel every previous pet animation.
+    pet_animation_id += 1
+
+    current_animation_id = (
+        pet_animation_id
     )
 
-    if sound is not None:
-
-        try:
-
-            sound.play()
-
-        except Exception as error:
-
-            print(
-                f"Could not play "
-                f"{pet_current_cat} audio: "
-                f"{error}"
-            )
-
     def animate(frame_number=0):
-
         if not pet_running:
             return
 
@@ -701,9 +693,15 @@ def show_pet_cat():
         if not pet_window.winfo_exists():
             return
 
+        # Ignore callbacks belonging to old cats.
+        if current_animation_id != pet_animation_id:
+            return
+
         pet_label.configure(
             image=photos[frame_number]
         )
+
+        pet_label.image = photos[frame_number]
 
         next_frame = (
             frame_number + 1
@@ -719,11 +717,10 @@ def show_pet_cat():
 
 
 # ==================================================
-# PET CAT
+# PET CLICK
 # ==================================================
 
 def pet_cat(event=None):
-
     global pet_count
     global pet_running
 
@@ -737,12 +734,16 @@ def pet_cat(event=None):
     )
 
     if pet_count >= PETS_REQUIRED:
-
         pet_running = False
 
         if pet_window is not None:
+            try:
+                pet_window.destroy()
+            except tk.TclError:
+                pass
 
-            pet_window.destroy()
+        # Make absolutely sure no previous audio remains.
+        stop_all_audio()
 
         root.after(
             300,
@@ -750,7 +751,7 @@ def pet_cat(event=None):
         )
 
     else:
-
+        # Show exactly one new pet image.
         show_pet_cat()
 
 
@@ -759,26 +760,25 @@ def pet_cat(event=None):
 # ==================================================
 
 def start_nyan_cat():
-
     global nyan_running
 
     if nyan_running:
         return
 
+    # Stop every audio source before Nyan appears.
+    stop_all_audio()
+
     nyan_running = True
 
     if not NYAN_GIF.exists():
-
         print(
             f"Nyan GIF missing: {NYAN_GIF}"
         )
 
         nyan_running = False
-
         return
 
     try:
-
         frames, durations = load_gif(
             NYAN_GIF,
             NYAN_SIZE
@@ -790,24 +790,17 @@ def start_nyan_cat():
         ]
 
     except Exception as error:
-
         print(
-            f"Could not load Nyan GIF: "
-            f"{error}"
+            f"Could not load Nyan GIF: {error}"
         )
 
         nyan_running = False
-
         return
 
     if nyan_audio_loaded:
-
         try:
-
             pygame.mixer.music.play()
-
         except Exception as error:
-
             print(
                 f"Could not play Nyan audio: "
                 f"{error}"
@@ -816,11 +809,7 @@ def start_nyan_cat():
     overlay = tk.Toplevel(root)
 
     overlay.overrideredirect(True)
-
-    overlay.attributes(
-        "-topmost",
-        True
-    )
+    overlay.attributes("-topmost", True)
 
     screen_width = (
         overlay.winfo_screenwidth()
@@ -870,33 +859,18 @@ def start_nyan_cat():
         current_x=cat_x,
         rainbow_offset=0
     ):
-
-        global nyan_running
-
         if not overlay.winfo_exists():
-
-            nyan_running = False
-
             return
 
-        canvas.delete(
-            "rainbow"
-        )
+        canvas.delete("rainbow")
+        canvas.delete("cat")
 
-        canvas.delete(
-            "cat"
-        )
-
-        trail_end = (
-            current_x + 25
-        )
+        trail_end = current_x + 25
 
         if trail_end > 0:
-
             for index, color in enumerate(
                 rainbow_colors
             ):
-
                 stripe_y = (
                     cat_y
                     + NYAN_SIZE // 2
@@ -913,7 +887,6 @@ def start_nyan_cat():
                 )
 
                 while segment_x < trail_end:
-
                     canvas.create_rectangle(
                         segment_x,
                         stripe_y,
@@ -956,19 +929,11 @@ def start_nyan_cat():
         )
 
         if current_x > screen_width:
-
-            if nyan_audio_loaded:
-
-                try:
-
-                    pygame.mixer.music.stop()
-
-                except Exception:
-
-                    pass
+            stop_all_audio()
 
             overlay.destroy()
 
+            global nyan_running
             nyan_running = False
 
             return
@@ -988,21 +953,17 @@ def start_nyan_cat():
 
 
 # ==================================================
-# PROCESS QUEUED EVENTS
+# EVENT PROCESSING
 # ==================================================
 
 def process_clicks():
-
     while not click_queue.empty():
-
         event_type, data = click_queue.get()
 
         if event_type == "PET":
-
             start_pet_challenge()
 
         elif event_type == "CLICK":
-
             x, y = data
 
             spawn_sticker(
@@ -1017,7 +978,7 @@ def process_clicks():
 
 
 # ==================================================
-# GLOBAL MOUSE LISTENER
+# MOUSE LISTENER
 # ==================================================
 
 def on_click(
@@ -1026,7 +987,6 @@ def on_click(
     button,
     pressed
 ):
-
     global click_count
 
     if not pressed:
@@ -1042,7 +1002,6 @@ def on_click(
     )
 
     if click_count >= CLICK_LIMIT:
-
         click_count = 0
 
         click_queue.put(
@@ -1053,7 +1012,6 @@ def on_click(
         )
 
     else:
-
         click_queue.put(
             (
                 "CLICK",
@@ -1066,11 +1024,9 @@ def on_click(
 
 
 def start_mouse_listener():
-
     with mouse.Listener(
         on_click=on_click
     ) as listener:
-
         listener.join()
 
 
