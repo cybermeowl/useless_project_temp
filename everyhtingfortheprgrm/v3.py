@@ -22,6 +22,11 @@ STICKER_GIFS = [
     BASE_FOLDER / "scuba_cat.gif",
 ]
 
+STICKER_AUDIO = {
+    "bop_cat.gif": AUDIO_FOLDER / "bop_cat_audio.mp3",
+    "scuba_cat.gif": AUDIO_FOLDER / "scuba_cat_audio.mp3",
+}
+
 NYAN_GIF = BASE_FOLDER / "nyan_cat.gif"
 
 PET_CATS = {
@@ -313,10 +318,21 @@ for gif_path in STICKER_GIFS:
             for frame in frames
         ]
 
+        sound = None
+        audio_file = find_audio_file(STICKER_AUDIO.get(gif_path.name, gif_path))
+        if audio_file is not None:
+            try:
+                sound = pygame.mixer.Sound(str(audio_file))
+                sound.set_volume(1.0)
+                print(f"Sticker audio loaded: {audio_file.name}")
+            except Exception as error:
+                print(f"Could not load sticker audio: {error}")
+
         loaded_sticker_gifs.append(
             (
                 photos,
-                durations
+                durations,
+                sound
             )
         )
 
@@ -386,9 +402,15 @@ def spawn_sticker(x, y):
     if not loaded_sticker_gifs:
         return
 
-    photos, durations = random.choice(
+    photos, durations, sound = random.choice(
         loaded_sticker_gifs
     )
+
+    if sound is not None:
+        try:
+            sound.play()
+        except Exception as error:
+            print(f"Could not play sticker audio: {error}")
 
     sticker = tk.Toplevel(root)
 
