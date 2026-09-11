@@ -26,7 +26,10 @@ STICKER_GIFS = [
 
 NYAN_GIF = BASE_FOLDER / "nyan_cat.gif"
 
-NYAN_AUDIO = AUDIO_FOLDER / "nyan_audio.mp3"
+NYAN_AUDIO = AUDIO_FOLDER / "nyan_audio"
+YAY_AUDIO = AUDIO_FOLDER / "yay_audio"
+NPC_AUDIO = AUDIO_FOLDER / "npc_audio"
+MEOWMER_IMAGE = PET_FOLDER / "meowmer.png"
 
 STICKER_AUDIO = {
     "bop_cat.gif": AUDIO_FOLDER / "bop_cat_audio.mp3",
@@ -77,12 +80,16 @@ pet_current_cat = None
 pet_animation_id = 0
 
 nyan_audio_loaded = False
+nyan_audio_file_loaded = None
+yay_audio_loaded = False
+meowmer_photo = None
 
 loaded_sticker_gifs = []
 loaded_pet_cats = {}
 
 sticker_audio_loaded = {}
 pet_audio_loaded = {}
+npc_audio_loaded = None
 
 
 # ==================================================
@@ -118,8 +125,20 @@ def find_audio_file(path):
     ]
 
     for file_path in possible_files:
-        if file_path.exists():
+        if file_path.is_file():
             return file_path
+
+    # Windows may hide extensions, and downloaded files sometimes have
+    # slightly different names. Try a case-insensitive stem match too.
+    if path.parent.exists():
+        wanted = path.stem.lower()
+        for file_path in path.parent.iterdir():
+            if (
+                file_path.is_file()
+                and file_path.suffix.lower() in {".mp3", ".wav", ".ogg"}
+                and file_path.stem.lower() == wanted
+            ):
+                return file_path
 
     return None
 
@@ -147,8 +166,8 @@ def discover_pet_cats():
     for pet_file in sorted(PET_FOLDER.iterdir()):
         if (
             pet_file.is_file()
-            and pet_file.suffix.lower()
-            in supported_extensions
+            and pet_file.suffix.lower() in supported_extensions
+            and pet_file.stem.lower() != "meowmer"
         ):
             pet_cats[pet_file.stem] = {
                 "gif": pet_file,
@@ -166,7 +185,7 @@ PET_CATS = discover_pet_cats()
 # ==================================================
 
 def initialize_audio():
-    global nyan_audio_loaded
+    global nyan_audio_loaded, nyan_audio_file_loaded, yay_audio_loaded, npc_audio_loaded
 
     try:
         pygame.mixer.init()
@@ -228,6 +247,7 @@ def initialize_audio():
                 str(nyan_audio_file)
             )
 
+            nyan_audio_file_loaded = nyan_audio_file
             nyan_audio_loaded = True
 
             print(
@@ -240,9 +260,36 @@ def initialize_audio():
                 f"Could not load Nyan audio: {error}"
             )
 
-    # Pet audio is optional for now.
+    # Meowmer audio
+    yay_audio_file = find_audio_file(YAY_AUDIO)
+    if yay_audio_file is not None:
+        yay_audio_loaded = True
+        print(f"Found yay audio: {yay_audio_file.name}")
+    else:
+        print("Yay audio not found.")
+
+    # NPC audio plays continuously during the seven-cat challenge.
+    npc_audio_file = find_audio_file(NPC_AUDIO)
+    if npc_audio_file is not None:
+        try:
+            npc_audio_loaded = pygame.mixer.Sound(str(npc_audio_file))
+            npc_audio_loaded.set_volume(1.0)
+            print(f"Loaded NPC audio: {npc_audio_file.name}")
+        except Exception as error:
+            print(f"Could not load NPC audio: {error}")
+    else:
+        print("NPC audio not found.")
+
+    # Pet audio is optional.
     for pet_name in PET_CATS:
         pet_audio_loaded[pet_name] = None
+        audio_file = find_audio_file(AUDIO_FOLDER / f"{pet_name}_audio")
+        if audio_file is not None:
+            try:
+                pet_audio_loaded[pet_name] = pygame.mixer.Sound(str(audio_file))
+                print(f"Loaded pet audio: {audio_file.name}")
+            except Exception as error:
+                print(f"Could not load pet audio for {pet_name}: {error}")
 
 
 initialize_audio()
@@ -501,8 +548,14 @@ def start_pet_challenge():
     pet_count = 0
     pet_current_cat = None
 
-    # Stop any normal sticker sounds.
+    # Stop any normal sticker sounds, then start the NPC sound for
+    # the entire seven-pet challenge.
     stop_all_audio()
+    if npc_audio_loaded is not None:
+        try:
+            npc_audio_loaded.play(loops=-1)
+        except Exception as error:
+            print(f"Could not play NPC audio: {error}")
 
     pet_window = tk.Toplevel(root)
 
@@ -747,12 +800,72 @@ def pet_cat(event=None):
 
         root.after(
             300,
-            start_nyan_cat
+            start_meowmer_screen
         )
 
     else:
         # Show exactly one new pet image.
         show_pet_cat()
+
+
+# ==================================================
+# MEOWMER SCREEN
+# ==================================================
+
+def start_meowmer_screen():
+    global meowmer_photo
+
+    stop_all_audio()
+
+    if not MEOWMER_IMAGE.exists():
+        print(f"Meowmer image missing: {MEOWMER_IMAGE}")
+        root.after(300, start_nyan_cat)
+        return
+
+    try:
+        image = Image.open(MEOWMER_IMAGE).convert("RGBA")
+        image.thumbnail((600, 600))
+        meowmer_photo = ImageTk.PhotoImage(image)
+    except Exception as error:
+        print(f"Could not load meowmer image: {error}")
+        root.after(300, start_nyan_cat)
+        return
+
+    window = tk.Toplevel(root)
+    window.title("Meowmer")
+    window.attributes("-topmost", True)
+    window.configure(bg="#202020")
+    window.resizable(False, False)
+
+    label = tk.Label(
+        window, image=meowmer_photo,
+        bg="#202020",
+        padx=20, pady=20
+    )
+    label.pack()
+
+    window.update_idletasks()
+    x = (window.winfo_screenwidth() - window.winfo_width()) // 2
+    y = (window.winfo_screenheight() - window.winfo_height()) // 2
+    window.geometry(f"+{x}+{y}")
+
+    yay_file = find_audio_file(YAY_AUDIO)
+    if yay_file is not None:
+        try:
+            pygame.mixer.music.load(str(yay_file))
+            pygame.mixer.music.play()
+        except Exception as error:
+            print(f"Could not play yay audio: {error}")
+
+    def finish():
+        stop_all_audio()
+        try:
+            window.destroy()
+        except tk.TclError:
+            pass
+        root.after(200, start_nyan_cat)
+
+    window.after(2500, finish)
 
 
 # ==================================================
@@ -799,6 +912,9 @@ def start_nyan_cat():
 
     if nyan_audio_loaded:
         try:
+            # The Meowmer screen uses pygame.mixer.music for yay_audio,
+            # so reload Nyan here before starting it.
+            pygame.mixer.music.load(str(nyan_audio_file_loaded))
             pygame.mixer.music.play()
         except Exception as error:
             print(
@@ -859,6 +975,7 @@ def start_nyan_cat():
         current_x=cat_x,
         rainbow_offset=0
     ):
+        global nyan_running
         if not overlay.winfo_exists():
             return
 
@@ -933,7 +1050,6 @@ def start_nyan_cat():
 
             overlay.destroy()
 
-            global nyan_running
             nyan_running = False
 
             return
