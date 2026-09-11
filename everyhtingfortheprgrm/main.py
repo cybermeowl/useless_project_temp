@@ -22,6 +22,7 @@ PET_FOLDER = BASE_FOLDER / "pet_the_car"
 STICKER_GIFS = [
     BASE_FOLDER / "bop_cat.gif",
     BASE_FOLDER / "scuba_cat.gif",
+    BASE_FOLDER / "jumping_cat.gif",
 ]
 
 NYAN_GIF = BASE_FOLDER / "nyan_cat.gif"
@@ -34,6 +35,7 @@ MEOWMER_IMAGE = PET_FOLDER / "meowmer.png"
 STICKER_AUDIO = {
     "bop_cat.gif": AUDIO_FOLDER / "bop_cat_audio.mp3",
     "scuba_cat.gif": AUDIO_FOLDER / "scuba_cat_audio.mp3",
+    "jumping_cat.gif": AUDIO_FOLDER / "chipi_chip_chapa_chapa_audio.mp3",
 }
 
 
