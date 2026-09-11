@@ -13,26 +13,26 @@
 -Kevin Joy Puliyani
 
 ### Project Description
-A cat meme bombing program. A random cat meme appears each time you click using your cursor
+[A cat meme bombing program. A random cat meme appears each time you click using your cursor]
 
 ### The Problem (that doesn't exist)
-People dont get enough dopamine in a day
+[People dont get enough dopamine in a day]
 
 ### The Solution (that nobody asked for)
-This program solves it by giving an instant serotonin boost
+[This program solves it by giving an instant serotonin boost]
 
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- Python
-- Tkinter, Python Frameworks library
-- Pillow, Pygame, pynput
-- Python, Visual Studio Code, Powershell,   GitHub,ChatGPT
+- [Python]
+- [Tkinter, Python Frameworks library]
+- [Pillow, Pygame, pynput]
+- [Python, Visual Studio Code, Powershell,   GitHub,ChatGPT]
 
 For Hardware:
-- List main components
-- List specifications
-- List tools required]
+- [List main components]
+- [List specifications]
+- [List tools required]
 
 ### Implementation
 For Software:
@@ -45,18 +45,18 @@ For Software:
 ### Project Documentation
 For Software:
 
-# Screenshots
-(<Screenshot (24).png>)
-Application in use
+# Screenshots (Add at least 3)
+![Scree![Application in use](<Screenshot (24).png>)nshot1](Add screenshot 1 here with proper name)
+*Add caption explaining what this shows*
 
-(<Screenshot (31).png>)
-More into the interface
+![![Another addition of the application](<Screenshot (31).png>)](Add screenshot 2 here with proper name)
+*Add caption explaining what this shows*
 
-(<Screenshot (29).png>)hot3]
-Easter egg. Use the program to find out :)
+![Screens![Easter egg. Use the program to find out :)](<Screenshot (29).png>)hot3](Add screenshot 3 here with proper name)
+*Add caption explaining what this shows*
 
 # Diagrams
-Workflow Diagram and System Architecture(image.png)low]
+![Workf![Workflow Diagram and System Architecture](image.png)low]
 
 For Hardware:
 
