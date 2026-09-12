@@ -47,10 +47,10 @@ For Software:
 For Software:
 
 # Screenshots 
-![Application in use](<Screenshot (24).png>)
+!(<Screenshot (24).png>)
 *Application in use*
 
-![![Another addition of the application](<Screenshot (31).png>)](Add screenshot 2 here with proper name)
+![Another addition of the application](<Screenshot (31).png>)](Add screenshot 2 here with proper name)
 *Add caption explaining what this shows*
 
 ![Screens![Easter egg. Use the program to find out :)](<Screenshot (29).png>)hot3](Add screenshot 3 here with proper name)
