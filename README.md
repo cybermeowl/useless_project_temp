@@ -16,7 +16,7 @@
 A cat meme bombing program. A random cat meme appears each time you click using your cursor
 
 ### The Problem (that doesn't exist)
-People dont get enough dopamine in a day
+People don't get enough dopamine in a day
 
 ### The Solution (that nobody asked for)
 This program solves it by giving an instant serotonin boost
@@ -64,8 +64,18 @@ Application in use
 
 ### Project Demo
 # Video
-[Add your demo video link here]
-*Explain what the video demonstrates*
+
+
+
+
+https://github.com/user-attachments/assets/c2b9717f-ac40-4f1c-9459-b1535c546694
+
+
+
+
+
+
+*Program walkthrough*
 
 # Additional Demos
 [Add any extra demo materials/links]
