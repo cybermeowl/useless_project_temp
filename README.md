@@ -40,14 +40,15 @@ For Software:
 [commands]
 
 # Run
-[commands]
+[1.Open a terminal in the folder containing the file "main.py"
+2. Enter "python main.py" in the terminal and run ]
 
 ### Project Documentation
 For Software:
 
-# Screenshots (Add at least 3)
-![Scree![Application in use](<Screenshot (24).png>)nshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+# Screenshots 
+![Application in use](<Screenshot (24).png>)
+*Application in use*
 
 ![![Another addition of the application](<Screenshot (31).png>)](Add screenshot 2 here with proper name)
 *Add caption explaining what this shows*
