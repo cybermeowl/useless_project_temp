@@ -30,14 +30,7 @@ For Software:
 - Python, Visual Studio Code, Powershell, GitHub, ChatGPT
 
 For Hardware:
-- List main components
-- List specifications
-- List tools required
-
-### Implementation
-For Software:
-# Installation
-[commands]
+Requirements- a laptop/pc and a mouse
 
 # Run
 1.Open a terminal in the folder containing the file "main.py"
