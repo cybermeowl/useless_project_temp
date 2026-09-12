@@ -47,7 +47,8 @@ For Software:
 For Software:
 
 # Screenshots 
-![Application in use](<Screenshot (24).png>)
+![Application in use](<img width="1920" height="1080" alt="Screenshot (24)" src="https://github.com/user-attachments/assets/5f7d6756-67b5-427a-8ad8-2772329ef16d" />
+)
 *Program in use*
 
 
