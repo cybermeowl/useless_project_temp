@@ -47,7 +47,8 @@ For Software:
 For Software:
 
 # Screenshots 
-![Application in use](<img width="1920" height="1080" alt="Screenshot (24)" src="https://github.com/user-attachments/assets/5f7d6756-67b5-427a-8ad8-2772329ef16d" />
+![Application in use](<img width="1920" height="1080" alt="Screenshot (24)" src="https://github.com/user-attachments/assets/94ca6cd0-5af6-4c50-81a2-7b146db123a2" />
+
 )
 *Program in use*
 
