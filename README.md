@@ -50,23 +50,17 @@ For Software:
 ![Application in use](<Screenshot (24).png>)
 *Program in use*
 
-![Another addition of the application](<Screenshot (31).png>)]
+
+![Another addition of the application](<Screenshot (31).png>)
 *More into the program interface*
 
-![Easter egg. Use the program to find out :)](<Screenshot (29).png>)]
+
+![Easter egg. Use the program to find out :)](<Screenshot (29).png>)
 *Easter egg. Use the program to find out :)*
 
 # Diagrams
-![Workf![Workflow Diagram and System Architecture](image.png)low]
+![Workflow Diagram and System Architecture](image.png)
 
-For Hardware:
-
-# Schematic & Circuit
-![Circuit](Add your circuit diagram here)
-*Add caption explaining connections*
-
-![Schematic](Add your schematic diagram here)
-*Add caption explaining the schematic*
 
 ### Project Demo
 # Video
