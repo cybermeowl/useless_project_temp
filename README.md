@@ -47,14 +47,14 @@ For Software:
 For Software:
 
 # Screenshots 
-!(<Screenshot (24).png>)
-*Application in use*
+![Application in use](<Screenshot (24).png>)
+*Program in use*
 
-![Another addition of the application](<Screenshot (31).png>)](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
+![Another addition of the application](<Screenshot (31).png>)]
+*More into the program interface*
 
-![Screens![Easter egg. Use the program to find out :)](<Screenshot (29).png>)hot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
+![Easter egg. Use the program to find out :)](<Screenshot (29).png>)]
+*Easter egg. Use the program to find out :)*
 
 # Diagrams
 ![Workf![Workflow Diagram and System Architecture](image.png)low]
