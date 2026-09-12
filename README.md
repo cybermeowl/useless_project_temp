@@ -77,14 +77,6 @@ https://github.com/user-attachments/assets/c2b9717f-ac40-4f1c-9459-b1535c546694
 
 *Program walkthrough*
 
-# Additional Demos
-[Add any extra demo materials/links]
-
-## Team Contributions
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
-
 ---
 Made with ❤️ at TinkerHub Useless Projects 
 
